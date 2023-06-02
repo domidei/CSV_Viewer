@@ -9,14 +9,8 @@ public class CsvPrinter {
 
         printHeader(file);
         printBodyPart(file, page - 1);
-        printInteractionText(file, page);
-
     }
 
-    private void printInteractionText(File file, int page) {
-        System.out.println("Page " + page + " of " + file.getPages());
-        System.out.println("F)irst page, P)revious page, N)ext page, L)ast page, J)ump to page, E)xit");
-    }
 
     private void printHeader(File file) {
         var header = file.getHeader();

@@ -46,11 +46,12 @@ public class File {
     }
 
     public File(List<List<String>> content, int pageLength) {
-        this.pages = (content.size() % pageLength == 0) ? content.size() / pageLength : content.size() / pageLength + 1;
-        this.header = content.get(0);
-        this.bodyParts = splitList(content.subList(1, content.size()), pages);
+        var numberedContent = addNumbers(content);
+        this.pages = (numberedContent.size() % pageLength == 0) ? numberedContent.size() / pageLength : numberedContent.size() / pageLength + 1;
+        this.header = numberedContent.get(0);
+        this.bodyParts = splitList(numberedContent.subList(1, numberedContent.size()), pages);
         this.pageLength = pageLength;
-        this.columnWidths = getColumnWidths(content);
+        this.columnWidths = getColumnWidths(numberedContent);
     }
 
     public <T> List<List<T>> splitList(List<T> list, final int batchSize) {
@@ -80,5 +81,27 @@ public class File {
         }
 
         return columnWidths;
+    }
+
+    private List<List<String>> addNumbers(List<List<String>> content) {
+        List<List<String>> newContent = new ArrayList<>();
+
+        var header = new ArrayList<String>();
+        header.add("No.");
+        for (String element : content.get(0)) {
+            header.add(element);
+        }
+        newContent.add(header);
+
+        for (int i = 1; i < content.size(); i++) {
+            var line = new ArrayList<String>();
+            line.add(String.format("%d.", i));
+            for (String element : content.get(i)) {
+                line.add(element);
+            }
+            newContent.add(line);
+        }
+
+        return newContent;
     }
 }

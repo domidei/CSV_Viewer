@@ -17,6 +17,7 @@ public class ConsolePrinter {
         String input = "";
         int currentPage = 1;
         csvPrinter.printCsv(file, currentPage);
+        printNavigationOutput(currentPage, file.getPages());
 
         while (!input.equals("E")) {
             input = br.readLine();
@@ -28,11 +29,26 @@ public class ConsolePrinter {
                 case "L" -> currentPage = file.getPages();
                 case "J" -> {
                     try {
-                        currentPage = Integer.parseInt(br.readLine());
+                        var pageInput = Integer.parseInt(br.readLine());
+                        if (!(0 < pageInput && pageInput <= pageLength)) {
+                            throw new RuntimeException();
+                        } else {
+                            currentPage = pageInput;
+                        }
                     } catch (RuntimeException e) {
                         System.out.println("Must be a number between 1 and " + file.getPages());
-                        continue;
+                        System.out.println("Try again:");
                     }
+                }
+                case "S" -> {
+                    var sortInput = br.readLine();
+                    try {
+                        file = FileSorter.sortFile(file, sortInput);
+                    } catch (RuntimeException e) {
+                        System.out.println("Must be a valid column");
+                        System.out.println("Try again:");
+                    }
+
                 }
                 default -> {
                     System.out.println("No valid input");
@@ -41,6 +57,12 @@ public class ConsolePrinter {
             }
 
             csvPrinter.printCsv(file, currentPage);
+            printNavigationOutput(currentPage, file.getPages());
         }
+    }
+
+    private static void printNavigationOutput(int currentPage, int pages) {
+        System.out.println("Page " + currentPage + " of " + pages);
+        System.out.println("F)irst page, P)revious page, N)ext page, L)ast page, J)ump to page, S)ort, E)xit");
     }
 }
