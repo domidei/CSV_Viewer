@@ -1,43 +1,33 @@
 package org.example;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class CsvPrinter {
 
-    public void printCsv(File file, int length, int page) {
+    public void printCsv(File file, int page) {
 
-        List<Integer> columnWidths = getColumnWidths(file.getContent());
+        printHeader(file);
+        printBodyPart(file, page - 1);
+        printInteractionText(file, page);
 
-        var header = file.getContent().get(0);
-        var body = file.getContent().subList(1, file.getContent().size());
-        var part = body.subList(page, page + length);
-
-
-        printHeader(header, columnWidths);
-        printPart(part, columnWidths);
     }
 
-    private static List<Integer> getColumnWidths(List<List<String>> content) {
-        List<Integer> columnWidths = new ArrayList<>();
-        for (int i = 0; i < content.get(0).size(); i++) {
-            int finalI = i;
-            columnWidths.add(content.stream().map(element -> element.get(finalI)).max(Comparator.comparingInt(String::length)).get().length());
-        }
-
-        return columnWidths;
+    private void printInteractionText(File file, int page) {
+        System.out.println("Page " + page + " of " + file.getPages());
+        System.out.println("F)irst page, P)revious page, N)ext page, L)ast page, J)ump to page, E)xit");
     }
 
-    private void printHeader(List<String> header, List<Integer> columnWidths) {
-        List<Integer> columnSpaces = getColumnSpaces(header, columnWidths);
+    private void printHeader(File file) {
+        var header = file.getHeader();
+        List<Integer> columnSpaces = getColumnSpaces(header, file.getColumnWidths());
 
-        String headerPrint = "";
-        String headerLine = "";
+        StringBuilder headerPrint = new StringBuilder();
+        StringBuilder headerLine = new StringBuilder();
 
         for (int i = 0; i < header.size(); i++) {
-            headerPrint = headerPrint + header.get(i) + " ".repeat(columnSpaces.get(i)) + "|";
-            headerLine = headerLine + "-".repeat(columnWidths.get(i)) + "+";
+            headerPrint.append(header.get(i)).append(" ".repeat(columnSpaces.get(i))).append("|");
+            headerLine.append("-".repeat(file.getColumnWidths().get(i))).append("+");
         }
 
         System.out.println(headerPrint);
@@ -45,18 +35,19 @@ public class CsvPrinter {
     }
 
 
-    private void printPart(List<List<String>> body, List<Integer> columnWidths) {
+    private void printBodyPart(File file, int page) {
 
-        String linePrint = "";
+        var bodyPart = file.getBodyParts().get(page);
+        StringBuilder linePrint = new StringBuilder();
 
-        for (int i = 0; i < body.size(); i++) {
-            for (int j = 0; j < body.get(i).size(); j++) {
+        for (List<String> strings : bodyPart) {
+            for (int j = 0; j < strings.size(); j++) {
 
-                List<Integer> columnSpaces = getColumnSpaces(body.get(i), columnWidths);
-                linePrint = linePrint + body.get(i).get(j) + " ".repeat(columnSpaces.get(j)) + "|";
+                List<Integer> columnSpaces = getColumnSpaces(strings, file.getColumnWidths());
+                linePrint.append(strings.get(j)).append(" ".repeat(columnSpaces.get(j))).append("|");
             }
             System.out.println(linePrint);
-            linePrint = "";
+            linePrint = new StringBuilder();
         }
     }
 

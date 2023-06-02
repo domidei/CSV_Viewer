@@ -1,18 +1,32 @@
 package org.example;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class File {
 
-    private List<List<String>> content;
+    private List<String> header;
+    private List<List<List<String>>> bodyParts;
     private int pages;
+    private int pageLength;
 
-    public List<List<String>> getContent() {
-        return content;
+    private List<Integer> columnWidths;
+
+    public List<String> getHeader() {
+        return header;
     }
 
-    public void setContent(List<List<String>> content) {
-        this.content = content;
+    public void setHeader(List<String> header) {
+        this.header = header;
+    }
+
+    public List<List<List<String>>> getBodyParts() {
+        return bodyParts;
+    }
+
+    public void setBodyParts(List<List<List<String>>> bodyParts) {
+        this.bodyParts = bodyParts;
     }
 
     public int getPages() {
@@ -23,8 +37,48 @@ public class File {
         this.pages = pages;
     }
 
-    public File(List<List<String>> content, int length) {
-        this.content = content;
-        this.pages = (content.size() % length == 0) ? content.size() / length : content.size() / length + 1;
+    public int getPageLength() {
+        return pageLength;
+    }
+
+    public void setPageLength(int pageLength) {
+        this.pageLength = pageLength;
+    }
+
+    public File(List<List<String>> content, int pageLength) {
+        this.pages = (content.size() % pageLength == 0) ? content.size() / pageLength : content.size() / pageLength + 1;
+        this.header = content.get(0);
+        this.bodyParts = splitList(content.subList(1, content.size()), pages);
+        this.pageLength = pageLength;
+        this.columnWidths = getColumnWidths(content);
+    }
+
+    public <T> List<List<T>> splitList(List<T> list, final int batchSize) {
+        List<List<T>> parts = new ArrayList<>();
+        final int listSize = list.size();
+        List<T> batch;
+        for (int i = 0; i < listSize; i += batchSize) {
+            batch = list.subList(i, Math.min(listSize, i + batchSize));
+            parts.add(batch);
+        }
+        return parts;
+    }
+
+    public List<Integer> getColumnWidths() {
+        return columnWidths;
+    }
+
+    public void setColumnWidths(List<Integer> columnWidths) {
+        this.columnWidths = columnWidths;
+    }
+
+    private static List<Integer> getColumnWidths(List<List<String>> content) {
+        List<Integer> columnWidths = new ArrayList<>();
+        for (int i = 0; i < content.get(0).size(); i++) {
+            int finalI = i;
+            columnWidths.add(content.stream().map(element -> element.get(finalI)).max(Comparator.comparingInt(String::length)).orElseThrow().length());
+        }
+
+        return columnWidths;
     }
 }

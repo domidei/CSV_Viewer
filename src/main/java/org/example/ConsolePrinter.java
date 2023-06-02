@@ -6,37 +6,41 @@ import java.io.InputStreamReader;
 
 public class ConsolePrinter {
 
-    private static final int HEADER_LENGTH = 1;
+    public static void printToConsole(String filePath, int pageLength) throws IOException {
 
-    public static void printToConsole(String filePath, int outputLength) throws IOException {
-
-        var file = new File(FileReader.readFile(filePath), outputLength);
+        var file = new File(FileReader.readFile(filePath), pageLength);
 
         InputStreamReader isr = new InputStreamReader(System.in);
         BufferedReader br = new BufferedReader(isr);
         CsvPrinter csvPrinter = new CsvPrinter();
 
         String input = "";
-        var currentPage = 1;
-        int startElement = 0;
-        while (!input.equals("E")) {
-            csvPrinter.printCsv(file, outputLength, startElement);
+        int currentPage = 1;
+        csvPrinter.printCsv(file, currentPage);
 
-            System.out.println("Page " + currentPage + " of " + file.getPages());
-            System.out.println("F)irst page, P)revious page, N)ext page, L)ast page, J)ump to page, E)xit");
+        while (!input.equals("E")) {
             input = br.readLine();
 
-            if (input.equals("F"))
-                startElement = 0;
+            switch (input) {
+                case "F" -> currentPage = 1;
+                case "P" -> currentPage = (currentPage <= 1) ? 1 : currentPage - 1;
+                case "N" -> currentPage = (currentPage == file.getPages()) ? file.getPages() : currentPage + 1;
+                case "L" -> currentPage = file.getPages();
+                case "J" -> {
+                    try {
+                        currentPage = Integer.parseInt(br.readLine());
+                    } catch (RuntimeException e) {
+                        System.out.println("Must be a number between 1 and " + file.getPages());
+                        continue;
+                    }
+                }
+                default -> {
+                    System.out.println("No valid input");
+                    continue;
+                }
+            }
 
-            if (input.equals("P"))
-                startElement = (startElement <= outputLength) ? 0 : startElement - outputLength;
-
-            if (input.equals("N"))
-                startElement = (startElement + outputLength + outputLength >= file.getContent().size() - HEADER_LENGTH) ? file.getContent().size() - HEADER_LENGTH - outputLength : startElement + outputLength;
-
-            if (input.equals("L"))
-                startElement = file.getContent().size() - 1 - outputLength;
+            csvPrinter.printCsv(file, currentPage);
         }
     }
 }
