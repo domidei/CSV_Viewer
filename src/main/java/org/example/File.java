@@ -6,55 +6,60 @@ import java.util.List;
 
 public class File {
 
+    private List<List<String>> content;
     private List<String> header;
-    private List<List<List<String>>> bodyParts;
-    private int pages;
+    private List<List<List<String>>> pages;
+    private int pageCount;
     private int pageLength;
 
     private List<Integer> columnWidths;
+
+    public File(List<List<String>> content, int pageLength) {
+        this.content = content;
+        var numberedContent = addNumbers(content);
+        this.pageCount = (numberedContent.size() % pageLength == 0) ? numberedContent.size() / pageLength : numberedContent.size() / pageLength + 1;
+        this.header = numberedContent.get(0);
+        this.pages = splitList(numberedContent.subList(1, numberedContent.size()), pageLength);
+        this.pageLength = pageLength;
+        this.columnWidths = getColumnWidths(numberedContent);
+    }
 
     public List<String> getHeader() {
         return header;
     }
 
-    public void setHeader(List<String> header) {
-        this.header = header;
-    }
-
-    public List<List<List<String>>> getBodyParts() {
-        return bodyParts;
-    }
-
-    public void setBodyParts(List<List<List<String>>> bodyParts) {
-        this.bodyParts = bodyParts;
-    }
-
-    public int getPages() {
+    public List<List<List<String>>> getPages() {
         return pages;
     }
 
-    public void setPages(int pages) {
-        this.pages = pages;
+    public int getPageCount() {
+        return pageCount;
     }
 
     public int getPageLength() {
         return pageLength;
     }
 
-    public void setPageLength(int pageLength) {
-        this.pageLength = pageLength;
+    public List<List<String>> getContent() {
+        return content;
     }
 
-    public File(List<List<String>> content, int pageLength) {
-        var numberedContent = addNumbers(content);
-        this.pages = (numberedContent.size() % pageLength == 0) ? numberedContent.size() / pageLength : numberedContent.size() / pageLength + 1;
-        this.header = numberedContent.get(0);
-        this.bodyParts = splitList(numberedContent.subList(1, numberedContent.size()), pages);
-        this.pageLength = pageLength;
-        this.columnWidths = getColumnWidths(numberedContent);
+
+    public List<Integer> getColumnWidths() {
+        return columnWidths;
     }
 
-    public <T> List<List<T>> splitList(List<T> list, final int batchSize) {
+    private List<Integer> getColumnWidths(List<List<String>> content) {
+        List<Integer> columnWidths = new ArrayList<>();
+        for (int i = 0; i < content.get(0).size(); i++) {
+            int finalI = i;
+            columnWidths.add(content.stream().map(element -> element.get(finalI)).max(Comparator.comparingInt(String::length)).orElseThrow().length());
+        }
+
+        return columnWidths;
+    }
+
+    private  <T> List<List<T>> splitList(List<T> list, final int batchSize) {
         List<List<T>> parts = new ArrayList<>();
         final int listSize = list.size();
         List<T> batch;
@@ -63,24 +68,6 @@ public class File {
             parts.add(batch);
         }
         return parts;
-    }
-
-    public List<Integer> getColumnWidths() {
-        return columnWidths;
-    }
-
-    public void setColumnWidths(List<Integer> columnWidths) {
-        this.columnWidths = columnWidths;
-    }
-
-    private static List<Integer> getColumnWidths(List<List<String>> content) {
-        List<Integer> columnWidths = new ArrayList<>();
-        for (int i = 0; i < content.get(0).size(); i++) {
-            int finalI = i;
-            columnWidths.add(content.stream().map(element -> element.get(finalI)).max(Comparator.comparingInt(String::length)).orElseThrow().length());
-        }
-
-        return columnWidths;
     }
 
     private List<List<String>> addNumbers(List<List<String>> content) {

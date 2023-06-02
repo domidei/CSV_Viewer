@@ -5,14 +5,19 @@ import java.util.List;
 
 public class CsvPrinter {
 
-    public void printCsv(File file, int page) {
+    public static void printCsv(File file, int page) {
 
         printHeader(file);
         printBodyPart(file, page - 1);
+        printNavigationOutput(page, file.getPageCount());
     }
 
+    private static void printNavigationOutput(int currentPage, int pages) {
+        System.out.println("Page " + currentPage + " of " + pages);
+        System.out.println("F)irst page, P)revious page, N)ext page, L)ast page, J)ump to page, S)ort, E)xit");
+    }
 
-    private void printHeader(File file) {
+    private static void printHeader(File file) {
         var header = file.getHeader();
         List<Integer> columnSpaces = getColumnSpaces(header, file.getColumnWidths());
 
@@ -29,9 +34,9 @@ public class CsvPrinter {
     }
 
 
-    private void printBodyPart(File file, int page) {
+    private static void printBodyPart(File file, int page) {
 
-        var bodyPart = file.getBodyParts().get(page);
+        var bodyPart = file.getPages().get(page);
         StringBuilder linePrint = new StringBuilder();
 
         for (List<String> strings : bodyPart) {
