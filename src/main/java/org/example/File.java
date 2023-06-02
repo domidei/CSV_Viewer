@@ -59,7 +59,7 @@ public class File {
         return columnWidths;
     }
 
-    private  <T> List<List<T>> splitList(List<T> list, final int batchSize) {
+    private <T> List<List<T>> splitList(List<T> list, final int batchSize) {
         List<List<T>> parts = new ArrayList<>();
         final int listSize = list.size();
         List<T> batch;
